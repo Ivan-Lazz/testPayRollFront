@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Form - Pay Slip Generator</title>
+    <link rel="stylesheet" href="../../assets/css/variables.css">
+    <link rel="stylesheet" href="../../assets/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="shortcut icon" href="../../assets/img/favicon.ico" type="image/x-icon">
+    <script src="../../config.js"></script>
+    <script src="../../assets/js/utils/token.js"></script>
+    <script src="../../assets/js/utils/validator.js"></script>
+    <script src="../../assets/js/utils/notifications.js"></script>
+    <script src="../../assets/js/api/api.js"></script>
+    <script src="../../assets/js/api/auth.js"></script>
+    <script src="../../assets/js/api/accounts.js"></script>
+    <script src="../../assets/js/api/employees.js"></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <button class="header-menu-toggle" id="menu-toggle">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="header-logo">
+            <img src="../../assets/img/logo.png" alt="Company Logo">
+            <h1>Pay Slip Generator</h1>
+        </div>
+        <div class="header-actions">
+            <div class="user-info" id="user-info">
+                <span class="user-name" id="user-name">Loading...</span>
+                <div class="user-dropdown">
+                    <button class="btn btn-sm btn-outline" id="profile-btn">
+                        <i class="fas fa-user btn-icon"></i> Profile
+                    </button>
+                    <button class="btn btn-sm btn-danger" id="logout-btn">
+                        <i class="fas fa-sign-out-alt btn-icon"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Page Container -->
+    <div class="page-container">
+        <!-- Sidebar -->
+        <nav class="sidebar" id="sidebar">
+            <ul class="sidebar-menu">
+                <li class="sidebar-menu-item">
+                    <a href="../dashboard.html" class="sidebar-menu-link">
+                        <i class="fas fa-tachometer-alt sidebar-menu-icon"></i>
+                        <span class="sidebar-menu-text">Dashboard</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="../users/index.html" class="sidebar-menu-link">
+                        <i class="fas fa-users sidebar-menu-icon"></i>
+                        <span class="sidebar-menu-text">Users</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="../employees/index.html" class="sidebar-menu-link">
+                        <i class="fas fa-id-card sidebar-menu-icon"></i>
+                        <span class="sidebar-menu-text">Employees</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="../accounts/index.html" class="sidebar-menu-link active">
+                        <i class="fas fa-user-tag sidebar-menu-icon"></i>
+                        <span class="sidebar-menu-text">Employee Accounts</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="../banking/index.html" class="sidebar-menu-link">
+                        <i class="fas fa-university sidebar-menu-icon"></i>
+                        <span class="sidebar-menu-text">Banking Details</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="../payslips/index.html" class="sidebar-menu-link">
+                        <i class="fas fa-file-invoice-dollar sidebar-menu-icon"></i>
+                        <span class="sidebar-menu-text">Payslips</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="../payslips/form.html" class="sidebar-menu-link">
+                        <i class="fas fa-plus-circle sidebar-menu-icon"></i>
+                        <span class="sidebar-menu-text">Generate Payslip</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="container">
+                <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h1 class="page-title" id="form-title">Add New Employee Account</h1>
+                    <a href="index.html" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left btn-icon"></i> Back to Accounts
+                    </a>
+                </div>
+
+                <div class="card">
+                    <div class="card-body">
+                        <form id="accountForm" class="needs-validation">
+                            <div class="form-section">
+                                <h3>Employee Information</h3>
+                                
+                                <div class="form-group">
+                                    <label for="employee_id" class="form-label">Employee</label>
+                                    <select id="employee_id" class="form-select" required>
+                                        <option value="">Select Employee</option>
+                                        <!-- Options will be loaded dynamically -->
+                                    </select>
+                                    <div class="form-error" id="employee_id-error"></div>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">First Name</label>
+                                        <input type="text" id="employee_firstname" class="form-input" readonly>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label class="form-label">Last Name</label>
+                                        <input type="text" id="employee_lastname" class="form-input" readonly>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-section">
+                                <h3>Account Information</h3>
+                                
+                                <div class="form-group">
+                                    <label for="account_email" class="form-label">Email Address</label>
+                                    <input type="email" id="account_email" class="form-input" required data-validate="required|email">
+                                    <div class="form-error" id="account_email-error"></div>
+                                </div>
+                                
+                                <div class="form-row" id="password-section">
+                                    <div class="form-group">
+                                        <label for="account_password" class="form-label">Password</label>
+                                        <div class="password-input-container" style="position: relative;">
+                                            <input type="password" id="account_password" class="form-input" required data-validate="required|minLength:6">
+                                            <button type="button" id="togglePassword" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer;">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </div>
+                                        <div class="form-error" id="account_password-error"></div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="confirm_password" class="form-label">Confirm Password</label>
+                                        <input type="password" id="confirm_password" class="form-input" required data-validate="required|minLength:6">
+                                        <div class="form-error" id="confirm_password-error"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="account_type" class="form-label">Account Type</label>
+                                        <select id="account_type" class="form-select" required>
+                                            <option value="">Select Account Type</option>
+                                            <option value="Team Leader">Team Leader</option>
+                                            <option value="Overflow">Overflow</option>
+                                            <option value="Auto-Warranty">Auto-Warranty</option>
+                                            <option value="Commissions">Commissions</option>
+                                        </select>
+                                        <div class="form-error" id="account_type-error"></div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="account_status" class="form-label">Status</label>
+                                        <select id="account_status" class="form-select" required>
+                                            <option value="">Select Status</option>
+                                            <option value="ACTIVE">Active</option>
+                                            <option value="INACTIVE">Inactive</option>
+                                            <option value="SUSPENDED">Suspended</option>
+                                        </select>
+                                        <div class="form-error" id="account_status-error"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-actions" style="margin-top: 1rem;">
+                                <button type="submit" class="btn btn-primary" id="submit-btn">
+                                    <i class="fas fa-save btn-icon"></i> <span id="submit-text">Add Account</span>
+                                </button>
+                                <button type="button" class="btn btn-secondary" id="reset-btn">
+                                    <i class="fas fa-undo btn-icon"></i> Reset Form
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Success Modal -->
+    <div class="modal-backdrop" id="success-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">Account Saved Successfully</h2>
+                <button type="button" class="modal-close" id="close-success-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle alert-icon"></i>
+                    <div id="success-message">Account has been added successfully!</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="return-list-btn">
+                    <i class="fas fa-list btn-icon"></i> Return to List
+                </button>
+                <button type="button" class="btn btn-info" id="banking-btn">
+                    <i class="fas fa-university btn-icon"></i> Add Banking Details
+                </button>
+                <button type="button" class="btn btn-success" id="create-new-btn">
+                    <i class="fas fa-plus-circle btn-icon"></i> Create Another
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Notifications -->
+    <div id="notifications" class="notifications"></div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Check if user is authenticated
+            if (!isAuthenticated()) {
+                window.location.href = '../../pages/login.html';
+                return;
+            }
+            
+            // Get user info from token
+            const userInfo = getUserInfo();
+            if (userInfo) {
+                document.getElementById('user-name').textContent = userInfo.name || userInfo.username;
+            }
+            
+            // Initialize form validator
+            const validator = new FormValidator();
+            validator.setupFormValidation(document.getElementById('accountForm'));
+            
+            // Toggle password visibility
+            const togglePasswordBtn = document.getElementById('togglePassword');
+            const passwordInput = document.getElementById('account_password');
+            
+            togglePasswordBtn.addEventListener('click', () => {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                
+                // Also update confirm password field
+                document.getElementById('confirm_password').setAttribute('type', type);
+                
+                togglePasswordBtn.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+            });
+            
+            // Load account types
+            try {
+                const response = await getAccountTypes();
+                
+                if (response.success && response.data.length > 0) {
+                    const accountTypeSelect = document.getElementById('account_type');
+                    accountTypeSelect.innerHTML = '<option value="">Select Account Type</option>';
+                    
+                    response.data.forEach(type => {
+                        const option = document.createElement('option');
+                        option.value = type;
+                        option.textContent = type;
+                        accountTypeSelect.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading account types:', error);
+                // Use default values from config if API fails
+                const accountTypeSelect = document.getElementById('account_type');
+                accountTypeSelect.innerHTML = '<option value="">Select Account Type</option>';
+                
+                config.accountTypes.forEach(type => {
+                    const option = document.createElement('option');
+                    option.value = type;
+                    option.textContent = type;
+                    accountTypeSelect.appendChild(option);
+                });
+            }
+            
+            // Load account statuses
+            try {
+                const response = await getAccountStatuses();
+                
+                if (response.success && response.data.length > 0) {
+                    const accountStatusSelect = document.getElementById('account_status');
+                    accountStatusSelect.innerHTML = '<option value="">Select Status</option>';
+                    
+                    response.data.forEach(status => {
+                        const option = document.createElement('option');
+                        option.value = status;
+                        option.textContent = status;
+                        accountStatusSelect.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading account statuses:', error);
+                // Use default values from config if API fails
+                const accountStatusSelect = document.getElementById('account_status');
+                accountStatusSelect.innerHTML = '<option value="">Select Status</option>';
+                
+                config.accountStatuses.forEach(status => {
+                    const option = document.createElement('option');
+                    option.value = status;
+                    option.textContent = status;
+                    accountStatusSelect.appendChild(option);
+                });
+            }
+            
+            // Load employees
+            try {
+                const response = await getEmployees();
+                
+                if (response.success && response.data.length > 0) {
+                    const employeeSelect = document.getElementById('employee_id');
+                    employeeSelect.innerHTML = '<option value="">Select Employee</option>';
+                    
+                    response.data.forEach(employee => {
+                        const option = document.createElement('option');
+                        option.value = employee.employee_id;
+                        option.textContent = `${employee.firstname} ${employee.lastname} (${employee.employee_id})`;
+                        option.dataset.firstname = employee.firstname;
+                        option.dataset.lastname = employee.lastname;
+                        employeeSelect.appendChild(option);
+                    });
+                    
+                    // Check if employee ID is provided in URL
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const employeeIdParam = urlParams.get('employee_id');
+                    
+                    if (employeeIdParam) {
+                        employeeSelect.value = employeeIdParam;
+                        employeeSelect.dispatchEvent(new Event('change'));
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading employees:', error);
+                showNotification('error', 'Error', 'Failed to load employees');
+            }
+            
+            // Handle employee selection
+            document.getElementById('employee_id').addEventListener('change', function() {
+                const selectedOption = this.options[this.selectedIndex];
+                
+                if (selectedOption.value) {
+                    document.getElementById('employee_firstname').value = selectedOption.dataset.firstname;
+                    document.getElementById('employee_lastname').value = selectedOption.dataset.lastname;
+                } else {
+                    document.getElementById('employee_firstname').value = '';
+                    document.getElementById('employee_lastname').value = '';
+                }
+            });
+            
+            // Check if editing existing account
+            const urlParams = new URLSearchParams(window.location.search);
+            const accountId = urlParams.get('id');
+            
+            let isEditMode = false;
+            
+            // If editing existing account, load account data
+            if (accountId) {
+                try {
+                    const response = await getAccount(accountId);
+                    
+                    if (response.success) {
+                        isEditMode = true;
+                        
+                        // Update form title and submit button
+                        document.getElementById('form-title').textContent = 'Edit Employee Account';
+                        document.getElementById('submit-text').textContent = 'Update Account';
+                        
+                        // Populate form fields
+                        const account = response.data;
+                        document.getElementById('employee_id').value = account.employee_id;
+                        document.getElementById('employee_id').dispatchEvent(new Event('change'));
+                        document.getElementById('account_email').value = account.account_email;
+                        document.getElementById('account_type').value = account.account_type;
+                        document.getElementById('account_status').value = account.account_status;
+                        
+                        // Password fields are optional when editing
+                        document.getElementById('account_password').removeAttribute('required');
+                        document.getElementById('confirm_password').removeAttribute('required');
+                        
+                        // Add a note about passwords
+                        const passwordSection = document.getElementById('password-section');
+                        const passwordNote = document.createElement('div');
+                        passwordNote.className = 'form-col-full';
+                        passwordNote.innerHTML = `
+                            <div class="alert alert-info" style="margin-top: 0.5rem;">
+                                <i class="fas fa-info-circle alert-icon"></i>
+                                <div>Leave password fields empty to keep the current password.</div>
+                            </div>
+                        `;
+                        passwordSection.appendChild(passwordNote);
+                    }
+                } catch (error) {
+                    console.error('Error loading account:', error);
+                    showNotification('error', 'Error', 'Failed to load account data');
+                }
+            }
+            
+            // Handle form submission
+            document.getElementById('accountForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                // Add additional validation for password matching
+                const password = document.getElementById('account_password').value;
+                const confirmPassword = document.getElementById('confirm_password').value;
+                
+                if (password && password !== confirmPassword) {
+                    document.getElementById('confirm_password-error').textContent = 'Passwords do not match';
+                    document.getElementById('confirm_password').classList.add('is-invalid');
+                    return;
+                }
+                
+                // Validate form manually
+                const isValid = !validator.hasErrors();
+                
+                if (!isValid) {
+                    showNotification('error', 'Validation Error', 'Please fix the errors in the form');
+                    return;
+                }
+                
+                // Prepare account data
+                const accountData = {
+                    employee_id: document.getElementById('employee_id').value,
+                    account_email: document.getElementById('account_email').value,
+                    account_type: document.getElementById('account_type').value,
+                    account_status: document.getElementById('account_status').value
+                };
+                
+                // Add password if provided
+                if (password) {
+                    accountData.account_password = password;
+                }
+                
+                // Disable submit button to prevent multiple submissions
+                const submitBtn = document.getElementById('submit-btn');
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${isEditMode ? 'Updating...' : 'Adding...'}`;
+                
+                try {
+                    let response;
+                    
+                    if (isEditMode) {
+                        // Update existing account
+                        response = await updateAccount(accountId, accountData);
+                        
+                        if (response.success) {
+                            // Show success message
+                            document.getElementById('success-message').textContent = 'Account has been updated successfully!';
+                            
+                            // Hide create another button in edit mode
+                            document.getElementById('create-new-btn').style.display = 'none';
+                            
+                            // Set employee ID for banking button
+                            document.getElementById('banking-btn').setAttribute('data-id', accountData.employee_id);
+                            
+                            // Show success modal
+                            document.getElementById('success-modal').classList.add('show');
+                        }
+                    } else {
+                        // Create new account
+                        response = await createAccount(accountData);
+                        
+                        if (response.success) {
+                            // Show success message
+                            document.getElementById('success-message').textContent = 'Account has been added successfully!';
+                            
+                            // Show create another button
+                            document.getElementById('create-new-btn').style.display = 'inline-block';
+                            
+                            // Set employee ID for banking button
+                            document.getElementById('banking-btn').setAttribute('data-id', accountData.employee_id);
+                            
+                            // Show success modal
+                            document.getElementById('success-modal').classList.add('show');
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error saving account:', error);
+                    showNotification('error', 'Error', `Failed to ${isEditMode ? 'update' : 'add'} account`);
+                    
+                    // Re-enable submit button
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = `<i class="fas fa-save btn-icon"></i> ${isEditMode ? 'Update Account' : 'Add Account'}`;
+                }
+            });
+            
+            // Handle reset button
+            document.getElementById('reset-btn').addEventListener('click', () => {
+                if (confirm('Are you sure you want to reset the form?')) {
+                    document.getElementById('accountForm').reset();
+                    
+                    // Reset validation errors
+                    document.querySelectorAll('.form-error').forEach(el => {
+                        el.textContent = '';
+                    });
+                    
+                    document.querySelectorAll('.form-input, .form-select').forEach(el => {
+                        el.classList.remove('is-invalid');
+                    });
+                    
+                    if (isEditMode) {
+                        // Reload page to reset properly
+                        location.reload();
+                    }
+                }
+            });
+            
+            // Success modal actions
+            document.getElementById('close-success-modal').addEventListener('click', () => {
+                document.getElementById('success-modal').classList.remove('show');
+            });
+            
+            document.getElementById('return-list-btn').addEventListener('click', () => {
+                window.location.href = 'index.html';
+            });
+            
+            document.getElementById('banking-btn').addEventListener('click', function() {
+                const employeeId = this.getAttribute('data-id') || document.getElementById('employee_id').value;
+                window.location.href = `../banking/form.html?employee_id=${employeeId}`;
+            });
+            
+            document.getElementById('create-new-btn').addEventListener('click', () => {
+                // Reset form
+                document.getElementById('accountForm').reset();
+                
+                // Hide success modal
+                document.getElementById('success-modal').classList.remove('show');
+                
+                // Reset employee fields
+                document.getElementById('employee_firstname').value = '';
+                document.getElementById('employee_lastname').value = '';
+                
+                // Re-enable submit button
+                const submitBtn = document.getElementById('submit-btn');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-save btn-icon"></i> Add Account';
+                
+                // Reset validation errors
+                document.querySelectorAll('.form-error').forEach(el => {
+                    el.textContent = '';
+                });
+                
+                document.querySelectorAll('.form-input, .form-select').forEach(el => {
+                    el.classList.remove('is-invalid');
+                });
+            });
+            
+            // Toggle sidebar
+            const menuToggle = document.getElementById('menu-toggle');
+            const sidebar = document.getElementById('sidebar');
+            
+            menuToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('show');
+                document.body.classList.toggle('sidebar-collapsed');
+            });
+            
+            // Handle logout
+            document.getElementById('logout-btn').addEventListener('click', async () => {
+                if (confirm('Are you sure you want to log out?')) {
+                    try {
+                        await logout();
+                        window.location.href = '../../pages/login.html';
+                    } catch (error) {
+                        console.error('Logout error:', error);
+                        showNotification('error', 'Logout Failed', 'Failed to logout');
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
